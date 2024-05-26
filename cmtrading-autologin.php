@@ -25,26 +25,26 @@ if ( ! function_exists( 'is_plugin_active' ) ) {
 /**
  * Currently plugin version.
  */
-define( 'CM_AUTOLOGIN_CORE_VERSION', '1.0.0' );
-define( 'CM_AUTOLOGIN_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
-define( 'CM_AUTOLOGIN_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
-define( 'CM_AUTOLOGIN_PLUGIN_URL', plugins_url( '/' , __FILE__ ) );
+define( 'CMAS_AUTOLOGIN_CORE_VERSION', '1.0.0' );
+define( 'CMAS_AUTOLOGIN_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
+define( 'CMAS_AUTOLOGIN_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CMAS_AUTOLOGIN_PLUGIN_URL', plugins_url( '/' , __FILE__ ) );
 
-require_once CM_AUTOLOGIN_PLUGIN_PATH . 'includes/class-autoloader.php';
+require_once CMAS_AUTOLOGIN_PLUGIN_PATH . 'includes/class-autoloader.php';
 
 /**
  * The code that runs during plugin activation.
  */
-function activate_risco_group_core(): void {
-	new \cm\classes\core\Activator();
+function activate_cmas_autologin(): void {
+	new \cmas\classes\core\Activator();
 }
 
 /**
  * The code that runs during plugin deactivation.
  */
-function deactivate_risco_group_core(): void {
-	new \cm\classes\core\Dectivator();
+function deactivate_cmas_autologin(): void {
+	new \cmas\classes\core\Deactivator();
 }
 
-register_activation_hook( __FILE__, 'activate_risco_group_core' );
-register_deactivation_hook( __FILE__, 'deactivate_risco_group_core' );
+register_activation_hook( __FILE__, 'activate_cmas_autologin' );
+register_deactivation_hook( __FILE__, 'deactivate_cmas_autologin' );

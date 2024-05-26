@@ -1,8 +1,8 @@
 <?php
 
-namespace cm\classes\core;;
+namespace cmas\classes\core;
 
-class Dectivator {
+class Deactivator {
 
 	public function __construct() {
 		// ...

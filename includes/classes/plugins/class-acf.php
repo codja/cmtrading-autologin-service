@@ -1,6 +1,6 @@
 <?php
 
-namespace cm\classes\plugins;
+namespace cmas\classes\plugins;
 
 class ACF {
 
@@ -41,7 +41,7 @@ class ACF {
 						array(
 							'key'               => 'field_630b0fb1d56eR',
 							'label'             => esc_attr__( 'Enable Autologin', 'cmtrading-autologin' ),
-							'name'              => 'cm_autologin_enable',
+							'name'              => 'cmas_autologin_enable',
 							'type'              => 'true_false',
 							'instructions'      => '',
 							'required'          => 0,
@@ -60,7 +60,7 @@ class ACF {
 						array(
 							'key'                 => 'field_gf6T3263db56t',
 							'label'               => esc_attr__( 'Matching the lang parameter', 'cmtrading-autologin' ),
-							'name'                => 'cm_matching_lang_list',
+							'name'                => 'cmas_matching_lang_list',
 							'type'                => 'repeater',
 							'instructions'        => '',
 							'required'            => 0,
@@ -128,7 +128,7 @@ class ACF {
 						array(
 							'key'                 => 'field_5f5e326bmjJf9k',
 							'label'               => esc_attr__( 'IP Black List', 'cmtrading-autologin' ),
-							'name'                => 'cm_autologin_ip_black_list',
+							'name'                => 'cmas_autologin_ip_black_list',
 							'type'                => 'repeater',
 							'instructions'        => '',
 							'required'            => 0,
@@ -156,7 +156,7 @@ class ACF {
 								array(
 									'key'               => 'field_62f210ecf6Tr9',
 									'label'             => esc_attr__( 'IP addresses', 'cmtrading-autologin' ),
-									'name'              => 'cm_autologin_ip',
+									'name'              => 'cmas_autologin_ip',
 									'type'              => 'text',
 									'instructions'      => '',
 									'required'          => 0,
