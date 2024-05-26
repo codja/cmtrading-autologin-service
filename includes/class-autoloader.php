@@ -2,6 +2,8 @@
 
 namespace cm;
 
+use cm\classes\plugins\ACF;
+
 class Autoloader {
 
 	public static function register() {
@@ -24,7 +26,7 @@ class Autoloader {
 				$file_class_name = $type . '-' . strtolower( str_replace( '_', '-', array_pop( $parse_class ) ) ) . '.php';
 				$class           = implode( DIRECTORY_SEPARATOR, $parse_class ) . DIRECTORY_SEPARATOR . $file_class_name;
 				$file_path       = CM_AUTOLOGIN_PLUGIN_PATH . $class;
-
+				error_log($file_path);
 				if ( file_exists( $file_path ) ) {
 					require_once $file_path;
 					return true;
@@ -36,7 +38,7 @@ class Autoloader {
 	}
 
 	public static function start() {
-
+		new ACF();
 	}
 }
 

@@ -27,22 +27,22 @@ if ( ! function_exists( 'is_plugin_active' ) ) {
  */
 define( 'CM_AUTOLOGIN_CORE_VERSION', '1.0.0' );
 define( 'CM_AUTOLOGIN_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
-define( 'CM_AUTOLOGIN_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
-define( 'CM_AUTOLOGIN_PLUGIN_URL', untrailingslashit( plugins_url( '/' , __FILE__ ) ) );
+define( 'CM_AUTOLOGIN_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CM_AUTOLOGIN_PLUGIN_URL', plugins_url( '/' , __FILE__ ) );
 
 require_once CM_AUTOLOGIN_PLUGIN_PATH . 'includes/class-autoloader.php';
 
 /**
  * The code that runs during plugin activation.
  */
-function activate_risco_group_core() {
+function activate_risco_group_core(): void {
 	new \cm\classes\core\Activator();
 }
 
 /**
  * The code that runs during plugin deactivation.
  */
-function deactivate_risco_group_core() {
+function deactivate_risco_group_core(): void {
 	new \cm\classes\core\Dectivator();
 }
 

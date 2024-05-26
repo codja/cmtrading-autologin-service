@@ -1,6 +1,6 @@
 <?php
 
-namespace cm\classes\core;;
+namespace cm\classes\core;
 
 class Activator {
 
