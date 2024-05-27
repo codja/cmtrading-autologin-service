@@ -1,8 +1,9 @@
 <?php
 
-namespace cm;
+namespace cmas;
 
 use cmas\classes\Autologin;
+use cmas\classes\core\Error;
 use cmas\classes\plugins\ACF;
 
 class Autoloader {
@@ -41,6 +42,7 @@ class Autoloader {
 	public static function start(): void {
 		new ACF();
 		new Autologin();
+		Error::instance();
 	}
 }
 

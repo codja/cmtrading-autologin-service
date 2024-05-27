@@ -2,6 +2,8 @@
 
 namespace cmas\classes\external_api\panda;
 
+use cmas\classes\helpers\Request_Api;
+
 class Authorization {
 
 	public const BASE_URL_API = 'https://cmtrading.pandats-api.io/api/v3/';

@@ -12,7 +12,7 @@ class Error {
 		add_action( 'admin_notices', [ $this, 'notice_required_settings' ] );
 	}
 
-	public function log_error( string $title, string $error ) {
+	public function log_error( string $title, string $error ): void {
 		error_log(
 			'[' . gmdate( 'Y-m-d H:i:s' ) . '] Error: {' . $title . ':' . $error . "} \n===========\n",
 			3,
@@ -35,7 +35,7 @@ class Error {
 	}
 
 	public function is_form_enabled(): bool {
-		$enable = get_field( 'rgbc_authform_enable', 'option' );
+		$enable = get_field( 'cmas_autologin_enable', 'option' );
 		return $enable && $this->is_defined_constants();
 	}
 }

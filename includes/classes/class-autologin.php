@@ -10,6 +10,10 @@ use cmas\classes\helpers\Request_Api;
 
 class Autologin {
 
+	const DEFAULT_DOMAIN = 'https://www.cmtrading.com';
+
+	const DEFAULT_LANGUAGE = 'en';
+
 	const ENDPOINTS = [
 		'autologin'     => 'account_no',
 		'autologin_new' => 'customer_id',
@@ -23,6 +27,7 @@ class Autologin {
 		if ( ! Error::instance()->is_defined_constants() ) {
 			return;
 		}
+
 		$start = microtime( true );
 		$url   = trim(
 			wp_parse_url( $_SERVER['REQUEST_URI'] )['path'],
@@ -39,25 +44,23 @@ class Autologin {
 			exit;
 		}
 
-		$error_redirect = '/webtrader/?action=forexLogin';
-
 		if ( ! $this->check_blacklist_ip() ) {
-			wp_safe_redirect( $error_redirect );
-			exit;
+			wp_die( esc_html__( 'Forbidden. Contact the administrator.', 'cmtrading-autologin' ) );
 		}
 
 		$email      = sanitize_email( $_GET['emailaddress'] ?? '' );
 		$account_no = sanitize_text_field( $_GET['account_no'] ?? '' );
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
+		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
 
 		$start_panda     = microtime( true );
 		$user_registered = Panda_DB::instance()->get_user_register_data( 'email', $email, self::ENDPOINTS[ $url ] );
+
 		$panda_diff      = wp_sprintf( '%.6f sec.', microtime( true ) - $start_panda );
 		Error::instance()->log_error( 'Panda DB Time', $panda_diff );
 
 		if ( is_null( $user_registered ) || ! $this->is_account_no_match( $user_registered[ self::ENDPOINTS[ $url ] ], $account_no ) ) {
-			wp_safe_redirect( $error_redirect );
-			exit;
+			wp_die( esc_html__( 'Panda DB error. Contact the administrator.', 'cmtrading-autologin' ) );
 		}
 
 		$auth     = new Authorization();
@@ -76,8 +79,7 @@ class Autologin {
 		);
 
 		if ( ! $response ) {
-			wp_safe_redirect( $error_redirect );
-			exit;
+			wp_die( esc_html__( 'Panda API error. Contact the administrator.', 'cmtrading-autologin' ) );
 		}
 
 		if ( isset( $response['error'] ) ) {
@@ -92,11 +94,12 @@ class Autologin {
 			true,
 			$action
 		);
+		$link_for_redirect = $this->get_login_by_lang( $lang ) . $link_for_redirect;
 
 		$total_diff = wp_sprintf( '%.6f sec.', microtime( true ) - $start );
 		Error::instance()->log_error( 'Total Time', $total_diff );
 
-		wp_safe_redirect( $link_for_redirect );
+		wp_redirect( $link_for_redirect );
 		exit;
 	}
 
@@ -119,7 +122,7 @@ class Autologin {
 
 	private function check_blacklist_ip(): bool {
 		$ip_visitor    = Location::get_ip();
-		$black_list_ip = Helpers::get_array( get_field( 'rgbc_authform_ip_black_list', 'option' ) );
+		$black_list_ip = Helpers::get_array( get_field( 'cmas_autologin_ip_black_list', 'option' ) );
 
 		$result = true;
 		foreach ( $black_list_ip as $not_allowed_ip ) {
@@ -134,5 +137,30 @@ class Autologin {
 		}
 
 		return $result;
+	}
+
+	private function get_login_by_lang( string $lang ) {
+		$lang              = $lang ? $lang : self::DEFAULT_LANGUAGE;
+		$lang_domains_list = Helpers::get_array( get_field( 'cmas_matching_lang_list', 'option' ) );
+
+		if ( ! $lang_domains_list ) {
+			return self::DEFAULT_DOMAIN;
+		}
+
+		foreach ( $lang_domains_list as $lang_domain_list ) {
+			$lang_param = $lang_domain_list['param_lang_value'] ?? null;
+			$domain     = $lang_domain_list['param_lang_domain'] ?? null;
+
+			if ( ! $lang_param || ! $domain ) {
+				continue;
+			}
+
+			if ( $lang_param === $lang ) {
+				return $domain;
+			}
+
+		}
+
+		return self::DEFAULT_DOMAIN;
 	}
 }
