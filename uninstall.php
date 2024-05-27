@@ -14,4 +14,14 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Do something here if plugin is being uninstalled.
-// Remove Options
+$acf_options_list = [
+	'cmas_autologin_enable',
+	'cmas_matching_lang_list',
+	'cmas_autologin_ip_black_list',
+];
+
+if ( function_exists( 'delete_field' ) ) {
+	foreach ( $acf_options_list as $option_name ) {
+		delete_field( $option_name, 'option' );
+	}
+}

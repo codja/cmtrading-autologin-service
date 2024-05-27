@@ -1,0 +1,24 @@
+{
+	"nodes":[
+		{"id":"9e5db84ea2505b10","type":"text","text":"request to [services.cmtradomg.com](http://services.cmtradomg.com)","x":-200,"y":-420,"width":340,"height":60},
+		{"id":"bc4a6f6940a06a6f","type":"text","text":"Check IP","x":-200,"y":-290,"width":340,"height":50},
+		{"id":"2b5a7c4fb20097d4","type":"text","text":"Check Params","x":-200,"y":-140,"width":340,"height":60},
+		{"id":"5b0cb6f6899b1b4d","type":"text","text":"wp_die('Error Text')","x":-760,"y":-140,"width":250,"height":60},
+		{"id":"7792a5a10c285694","type":"text","text":"Get User From Panda DB by Params","x":-200,"y":-17,"width":340,"height":60},
+		{"id":"e179d7f0c7dc961a","type":"text","text":"Send data to Panda API for getting login link","x":-200,"y":127,"width":340,"height":60},
+		{"id":"78e565f501809602","type":"text","text":"Redirect to site(webtrader page) with needed language version","x":-200,"y":440,"width":340,"height":60},
+		{"id":"dea5c173315a4a6e","type":"text","text":"Make link for autologin by:\n- lang param\n- token for autologin from Panda API","x":-200,"y":260,"width":340,"height":137}
+	],
+	"edges":[
+		{"id":"3699540d3498d232","fromNode":"bc4a6f6940a06a6f","fromSide":"bottom","toNode":"5b0cb6f6899b1b4d","toSide":"top","label":"if IP in blacklist"},
+		{"id":"7baa88d02b4a3b99","fromNode":"bc4a6f6940a06a6f","fromSide":"bottom","toNode":"2b5a7c4fb20097d4","toSide":"top"},
+		{"id":"fc5ef62e9ba11660","fromNode":"2b5a7c4fb20097d4","fromSide":"left","toNode":"5b0cb6f6899b1b4d","toSide":"right","label":"If not/broken params"},
+		{"id":"e1a9ef4291b39277","fromNode":"2b5a7c4fb20097d4","fromSide":"bottom","toNode":"7792a5a10c285694","toSide":"top"},
+		{"id":"235d5aba149aba71","fromNode":"7792a5a10c285694","fromSide":"left","toNode":"5b0cb6f6899b1b4d","toSide":"bottom","label":"if user not found\n or account not matched"},
+		{"id":"78b8a0622486f61d","fromNode":"7792a5a10c285694","fromSide":"bottom","toNode":"e179d7f0c7dc961a","toSide":"top"},
+		{"id":"fbf882f4ecb53a4f","fromNode":"e179d7f0c7dc961a","fromSide":"bottom","toNode":"5b0cb6f6899b1b4d","toSide":"bottom","label":"if error"},
+		{"id":"34e85b18d72bb0ac","fromNode":"e179d7f0c7dc961a","fromSide":"bottom","toNode":"dea5c173315a4a6e","toSide":"top"},
+		{"id":"0f66093a7fa9aa27","fromNode":"dea5c173315a4a6e","fromSide":"bottom","toNode":"78e565f501809602","toSide":"top"},
+		{"id":"8ae3bcf67fe30ee1","fromNode":"9e5db84ea2505b10","fromSide":"bottom","toNode":"bc4a6f6940a06a6f","toSide":"top"}
+	]
+}
