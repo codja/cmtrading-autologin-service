@@ -3,10 +3,9 @@
 namespace cmas\classes;
 
 use cmas\classes\core\Error;
-use cmas\classes\external_api\panda\Authorization;
 use cmas\classes\helpers\Helpers;
 use cmas\classes\helpers\Location;
-use cmas\classes\helpers\Request_Api;
+use cmas\classes\providers\Antelope;
 
 class Autologin {
 
@@ -24,7 +23,7 @@ class Autologin {
 	}
 
 	public function autologin(): void {
-		if ( ! Error::instance()->is_defined_constants() ) {
+		if ( ! Error::instance()->is_form_enabled() ) {
 			return;
 		}
 
@@ -53,48 +52,25 @@ class Autologin {
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
 		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
 
-		$start_panda     = microtime( true );
-		$user_registered = Panda_DB::instance()->get_user_register_data( 'email', $email, self::ENDPOINTS[ $url ] );
+		$start_panda = microtime( true );
+
+		$field   = 'accountid';
+		$user_id = CRM_DB::instance()->get_user_register_data( 'email', $email, $field );
+		$user_id = $user_id[ $field ] ?? null;
 
 		$panda_diff      = wp_sprintf( '%.6f sec.', microtime( true ) - $start_panda );
 		Error::instance()->log_error( 'Panda DB Time', $panda_diff );
 
-		if ( is_null( $user_registered ) || ! $this->is_account_no_match( $user_registered[ self::ENDPOINTS[ $url ] ], $account_no ) ) {
+		if ( is_null( $user_id ) || ! $this->is_account_no_match( $user_id, $account_no ) ) {
 			wp_die( esc_html__( 'Panda DB error. Contact the administrator.', 'cmtrading-autologin' ) );
 		}
 
-		$auth     = new Authorization();
-		$response = Request_Api::send_api(
-			$auth::BASE_URL_API . 'system/loginToken',
-			wp_json_encode(
-				[
-					'email' => $email,
-				]
-			),
-			'POST',
-			[
-				'Authorization' => $auth->get_auth_data(),
-				'Content-Type'  => 'application/json',
-			]
-		);
+		$provider          = new Antelope();
+		$link_for_redirect = $provider->get_autologin_link( $user_id );
 
-		if ( ! $response ) {
+		if ( ! $link_for_redirect ) {
 			wp_die( esc_html__( 'Panda API error. Contact the administrator.', 'cmtrading-autologin' ) );
 		}
-
-		if ( isset( $response['error'] ) ) {
-			$description = $response['error'][0]['description'] ?? '';
-			$request_id  = $response['requestId'] ?? '';
-			Error::instance()->log_error( 'class-endpoint-error', "[$request_id] $description" );
-		}
-
-		$link_for_redirect = Request_Api::get_response_link(
-			$response['data']['url'] ?? '',
-			'action',
-			true,
-			$action
-		);
-		$link_for_redirect = $this->get_login_by_lang( $lang ) . $link_for_redirect;
 
 		$total_diff = wp_sprintf( '%.6f sec.', microtime( true ) - $start );
 		Error::instance()->log_error( 'Total Time', $total_diff );
@@ -112,12 +88,12 @@ class Autologin {
 		return reset( $date_without_time ) === $registration_date;
 	}
 
-	private function is_account_no_match( string $user_registered, string $account_no ): bool {
-		if ( ! $user_registered || ! $account_no ) {
+	private function is_account_no_match( string $user_id, string $account_no ): bool {
+		if ( ! $user_id || ! $account_no ) {
 			return false;
 		}
 
-		return $user_registered === $account_no;
+		return $user_id === $account_no;
 	}
 
 	private function check_blacklist_ip(): bool {

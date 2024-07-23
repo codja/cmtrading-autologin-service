@@ -25,13 +25,13 @@ class Error {
 			printf(
 				'<div class="notice notice-error"><h3>%s</h3><p>%s</p></div>',
 				esc_html( 'Cmtrading Autologin:' ),
-				esc_html__( 'You need add constants PANDA_PARTNER_ID and PANDA_PARTNER_SECRET_KEY in wp_config.', 'rgbcode-authform' ),
+				esc_html__( 'You need add constants ANTILOPE_API_CRM_KEY and ANTILOPE_API_AFFILIATE_KEY in wp_config.', 'rgbcode-authform' ),
 			);
 		}
 	}
 
 	public function is_defined_constants(): bool {
-		return defined( 'PANDA_PARTNER_ID' ) && defined( 'PANDA_PARTNER_SECRET_KEY' );
+		return defined( 'ANTILOPE_API_CRM_KEY' ) && defined( 'ANTILOPE_API_AFFILIATE_KEY' );
 	}
 
 	public function is_form_enabled(): bool {

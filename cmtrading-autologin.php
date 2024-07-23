@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Cmtrading Autologin
  * Plugin URI: https://rgbcode.com/
- * Description: Plugin for automatic login to the webtrader page (based on Panda data).
+ * Description: Plugin for automatic login to the webtrader.
  * Author: rgbcode
  * Author URI: https://rgbcode.com/
  * Version: 1.0.0
