@@ -4,7 +4,7 @@ namespace cmas\classes;
 
 use cmas\traits\Singleton;
 
-class Panda_DB {
+class CRM_DB {
 
 	use Singleton;
 
@@ -13,21 +13,21 @@ class Panda_DB {
 			return null;
 		}
 
-		$panda_db = self::instance()->db();
+		$crm_db = self::instance()->db();
 
-		if ( ! $panda_db ) {
+		if ( ! $crm_db ) {
 			return null;
 		}
 
-		$base_request = $panda_db->get_results(
-			$panda_db->prepare(
+		$base_request = $crm_db->get_results(
+			$crm_db->prepare(
 				"SELECT $fields FROM vtiger_account WHERE $column = %s",
-				$value
+				sanitize_text_field( $value )
 			),
 			ARRAY_A
 		);
 
-		$panda_db->close();
+		$crm_db->close();
 
 		return $base_request
 			? reset( $base_request )
@@ -40,10 +40,10 @@ class Panda_DB {
 		}
 
 		$panda_db = new \Wpdb(
-			PANDA_DB_USER,
-			PANDA_DB_PASS,
-			PANDA_DB_NAME,
-			PANDA_DB_HOST
+			CRM_DB_USER,
+			CRM_DB_PASS,
+			CRM_DB_NAME,
+			CRM_DB_HOST
 		);
 
 		if ( ! $panda_db->check_connection() ) {
@@ -54,10 +54,10 @@ class Panda_DB {
 	}
 
 	private function check_constants(): bool {
-		return defined( 'PANDA_DB_USER' )
-		&& defined( 'PANDA_DB_PASS' )
-		&& defined( 'PANDA_DB_NAME' )
-		&& defined( 'PANDA_DB_HOST' );
+		return defined( 'CRM_DB_USER' )
+		&& defined( 'CRM_DB_PASS' )
+		&& defined( 'CRM_DB_NAME' )
+		&& defined( 'CRM_DB_HOST' );
 	}
 
 }
