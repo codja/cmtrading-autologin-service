@@ -54,22 +54,22 @@ class Autologin {
 
 		$start_panda = microtime( true );
 
-		$field   = 'accountid';
+		$field   = 'account_no';
 		$user_id = CRM_DB::instance()->get_user_register_data( 'email', $email, $field );
 		$user_id = $user_id[ $field ] ?? null;
 
 		$panda_diff      = wp_sprintf( '%.6f sec.', microtime( true ) - $start_panda );
-		Error::instance()->log_error( 'Panda DB Time', $panda_diff );
+		Error::instance()->log_error( 'CRM DB Time', $panda_diff );
 
 		if ( is_null( $user_id ) || ! $this->is_account_no_match( $user_id, $account_no ) ) {
-			wp_die( esc_html__( 'Panda DB error. Contact the administrator.', 'cmtrading-autologin' ) );
+			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
 		$provider          = new Antelope();
 		$link_for_redirect = $provider->get_autologin_link( $user_id );
 
 		if ( ! $link_for_redirect ) {
-			wp_die( esc_html__( 'Panda API error. Contact the administrator.', 'cmtrading-autologin' ) );
+			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
 		$total_diff = wp_sprintf( '%.6f sec.', microtime( true ) - $start );

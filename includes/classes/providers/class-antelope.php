@@ -3,6 +3,7 @@
 namespace cmas\classes\providers;
 
 
+use cmas\classes\core\Error;
 use cmas\classes\helpers\Request_Api;
 use cmas\interfaces\Autologin;
 
@@ -16,18 +17,26 @@ class Antelope implements Autologin {
 		}
 
 		$body = [
-			'userid' => absint( $param ),
+			'userId' => absint( $param ),
 			'apikey' => ANTILOPE_API_AFFILIATE_KEY,
 		];
 
 		$response = Request_Api::send_api(
-			self::BASE_URL_API . 'getUser'. '?' . http_build_query( $body ),
+			self::BASE_URL_API . 'regenerateUserAutologinUrl'. '?' . http_build_query( $body ),
 			[],
 			'POST',
 			$this->get_headers()
 		);
 
-		return $response['result']['brokerLoginUrl'] ?? null;
+		if ( isset( $response['error'] ) ) {
+			$description   = $response['error']['errorDesc'] ?? '';
+			$error_log_msg = ' request_id[' . ( $response['requestId'] ?? '' ) . ']: ' . $description . ' ' . ( $response['error']['errorDetails'] ?? '' );
+			Error::instance()->log_error( 'Antelope_Api', $error_log_msg );
+
+			return null;
+		}
+
+		return $response['result'] ?? null;
 	}
 
 	private function get_headers(): array {
