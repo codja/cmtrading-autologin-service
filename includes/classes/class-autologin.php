@@ -52,6 +52,10 @@ class Autologin {
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
 		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
 
+		// TODO: temporary changes
+		wp_redirect( 'https://myaccount.cmtrading.com/#/login' );
+		exit;
+
 		$start_panda = microtime( true );
 
 		$fields        = 'account_no, accountid';
