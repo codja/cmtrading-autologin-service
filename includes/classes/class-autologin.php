@@ -54,19 +54,20 @@ class Autologin {
 
 		$start_panda = microtime( true );
 
-		$field   = 'account_no';
-		$user_id = CRM_DB::instance()->get_user_register_data( 'email', $email, $field );
-		$user_id = $user_id[ $field ] ?? null;
+		$fields        = 'account_no, accountid';
+		$user_data     = CRM_DB::instance()->get_user_register_data( 'email', $email, $fields );
+		$db_account_no = $user_data[ 'account_no' ] ?? null;
+		$account_id    = $user_data[ 'accountid' ] ?? null;
 
 		$panda_diff      = wp_sprintf( '%.6f sec.', microtime( true ) - $start_panda );
 		Error::instance()->log_error( 'CRM DB Time', $panda_diff );
 
-		if ( is_null( $user_id ) || ! $this->is_account_no_match( $user_id, $account_no ) ) {
+		if ( is_null( $db_account_no ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_account_no, $account_no ) ) {
 			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
 		$provider          = new Antelope();
-		$link_for_redirect = $provider->get_autologin_link( $user_id );
+		$link_for_redirect = $provider->get_autologin_link( $account_id );
 
 		if ( ! $link_for_redirect ) {
 			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
