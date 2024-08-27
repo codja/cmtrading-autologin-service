@@ -9,7 +9,7 @@ use cmas\interfaces\Autologin;
 
 class Antelope implements Autologin {
 
-	public const BASE_URL_API = 'https://api.cmtrading.com/SignalsServer/api/';
+	public const BASE_URL_API = 'https://apicrm.cmtrading.com/SignalsCRM/crm-api/';
 
 	public function get_autologin_link( $param ): ?string {
 		if ( ! $param ) {
@@ -17,8 +17,7 @@ class Antelope implements Autologin {
 		}
 
 		$body = [
-			'userId' => absint( $param ),
-			'apikey' => ANTILOPE_API_AFFILIATE_KEY,
+			'userId' => absint( $param )
 		];
 
 		$response = Request_Api::send_api(
@@ -44,6 +43,7 @@ class Antelope implements Autologin {
 		return [
 			'Content-Type'    => 'application/json',
 			'Accept'          => 'application/json',
+			'x-crm-api-token' => ANTILOPE_API_CRM_KEY,
 		];
 	}
 
