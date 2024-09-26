@@ -58,12 +58,12 @@ class Autologin {
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
 		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
 
-		$fields        = 'account_no, accountid';
-		$user_data     = CRM_DB::instance()->get_user_register_data( 'email', $email, $fields );
-		$db_account_no = $user_data['account_no'] ?? null;
-		$account_id    = $user_data['accountid'] ?? null;
+		$fields         = 'customer_id, accountid';
+		$user_data      = CRM_DB::instance()->get_user_register_data( 'email', $email, $fields );
+		$db_customer_id = $user_data['customer_id'] ?? null;
+		$account_id     = $user_data['accountid'] ?? null;
 
-		if ( is_null( $db_account_no ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_account_no, $account_no ) ) {
+		if ( is_null( $db_customer_id ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_customer_id, $account_no ) ) {
 			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
