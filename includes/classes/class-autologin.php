@@ -53,7 +53,7 @@ class Autologin {
 
 		$platform         = sanitize_text_field( $_GET['platform'] ?? '' );
 		$asset            = sanitize_text_field( $_GET['asset'] ?? '' );
-		$is_platform_link = $platform === 'Webtrader' && $asset === 'USDCAD';
+		$is_platform_link = $platform === 'Webtrader' && ! empty( $asset );
 
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
 		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
@@ -69,7 +69,7 @@ class Autologin {
 
 		$provider          = new Antelope();
 		$link_for_redirect = $is_platform_link
-			? $this->get_sso_link( $provider, $account_id )
+			? $this->get_sso_link( $provider, $asset, $account_id )
 			: $provider->get_autologin_link( $account_id );
 
 		if ( ! $link_for_redirect ) {
@@ -149,8 +149,9 @@ class Autologin {
 	 *
 	 * @return string|null
 	 */
-	private function get_sso_link( Antelope $provider, $account_id ): ?string {
+	private function get_sso_link( Antelope $provider, $asset, $account_id ): ?string {
 		if ( ! $account_id
+			|| ! $asset
 			|| ! defined( 'SSO_WEBTRADER_URL' )
 			|| ! defined( 'SSO_WEBTRADER_TOKEN' )
 			|| ! defined( 'SSO_WEBTRADER_REDIRECT_URL' )
@@ -189,7 +190,7 @@ class Autologin {
 			return null;
 		}
 
-		return esc_url_raw( SSO_WEBTRADER_REDIRECT_URL . $sso_token );
+		return esc_url_raw( SSO_WEBTRADER_REDIRECT_URL . $asset . '&token=' . $sso_token );
 	}
 
 	/**
