@@ -18,9 +18,9 @@ class ACF {
 		if ( function_exists( 'acf_add_options_page' ) ) {
 			acf_add_options_page(
 				[
-					'page_title' => esc_attr__( 'Autologin Panda', 'cmtrading-autologin' ),
-					'menu_title' => esc_attr__( 'Autologin Panda', 'cmtrading-autologin' ),
-					'menu_slug'  => 'cm-autologin-panda-options',
+					'page_title' => esc_attr__( 'Autologin CRM', 'cmtrading-autologin' ),
+					'menu_title' => esc_attr__( 'Autologin CRM', 'cmtrading-autologin' ),
+					'menu_slug'  => 'cm-autologin-crm-options',
 					'capability' => 'edit_posts',
 					'icon_url'   => 'dashicons-admin-network', // Add this line and replace the second inverted commas with class of the icon you like
 					'position'   => 30,
@@ -36,7 +36,7 @@ class ACF {
 			acf_add_local_field_group(
 				array(
 					'key'                   => 'group_62f20424bf6b0',
-					'title'                 => esc_attr__( 'Autologin Panda settings', 'cmtrading-autologin' ),
+					'title'                 => esc_attr__( 'Autologin CRM settings', 'cmtrading-autologin' ),
 					'fields'                => array(
 						array(
 							'key'               => 'field_630b0fb1d56eR',
@@ -180,7 +180,7 @@ class ACF {
 							array(
 								'param'    => 'options_page',
 								'operator' => '==',
-								'value'    => 'cm-autologin-panda-options',
+								'value'    => 'cm-autologin-crm-options',
 							),
 						),
 					),
