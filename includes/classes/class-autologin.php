@@ -5,6 +5,7 @@ namespace cmas\classes;
 use cmas\classes\core\Error;
 use cmas\classes\helpers\Helpers;
 use cmas\classes\helpers\Location;
+use cmas\classes\helpers\Request_Api;
 use cmas\classes\providers\Antelope;
 
 class Autologin {
@@ -49,32 +50,31 @@ class Autologin {
 
 		$email      = sanitize_email( $_GET['emailaddress'] ?? '' );
 		$account_no = sanitize_text_field( $_GET['account_no'] ?? '' );
+
+		$platform         = sanitize_text_field( $_GET['platform'] ?? '' );
+		$asset            = sanitize_text_field( $_GET['asset'] ?? '' );
+		$is_platform_link = $platform === 'Webtrader' && $asset === 'USDCAD';
+
 		$action     = sanitize_text_field( $_GET['action'] ?? '' );
 		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
 
-		$start_panda = microtime( true );
-
 		$fields        = 'account_no, accountid';
 		$user_data     = CRM_DB::instance()->get_user_register_data( 'email', $email, $fields );
-		$db_account_no = $user_data[ 'account_no' ] ?? null;
-		$account_id    = $user_data[ 'accountid' ] ?? null;
-
-		$panda_diff      = wp_sprintf( '%.6f sec.', microtime( true ) - $start_panda );
-		Error::instance()->log_error( 'CRM DB Time', $panda_diff );
+		$db_account_no = $user_data['account_no'] ?? null;
+		$account_id    = $user_data['accountid'] ?? null;
 
 		if ( is_null( $db_account_no ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_account_no, $account_no ) ) {
 			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
 		$provider          = new Antelope();
-		$link_for_redirect = $provider->get_autologin_link( $account_id );
+		$link_for_redirect = $is_platform_link
+			? $this->get_sso_link( $provider, $account_id )
+			: $provider->get_autologin_link( $account_id );
 
 		if ( ! $link_for_redirect ) {
 			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
-
-		$total_diff = wp_sprintf( '%.6f sec.', microtime( true ) - $start );
-		Error::instance()->log_error( 'Total Time', $total_diff );
 
 		wp_redirect( $link_for_redirect );
 		exit;
@@ -139,5 +139,96 @@ class Autologin {
 		}
 
 		return self::DEFAULT_DOMAIN;
+	}
+
+	/**
+	 * Generate the SSO link to the webtrader
+	 *
+	 * @param Antelope $provider
+	 * @param $account_id
+	 *
+	 * @return string|null
+	 */
+	private function get_sso_link( Antelope $provider, $account_id ): ?string {
+		if ( ! $account_id
+			|| ! defined( 'SSO_WEBTRADER_URL' )
+			|| ! defined( 'SSO_WEBTRADER_TOKEN' )
+			|| ! defined( 'SSO_WEBTRADER_REDIRECT_URL' )
+		) {
+			return null;
+		}
+
+		// get all of the client trading accounts
+		$trading_accounts = Helpers::get_array( $provider->get_trading_accounts( $account_id ) );
+		// we will use the last one that had update
+		$last_trading_account = $this->get_last_trading_account( $trading_accounts );
+		// from the returned result we need to get the externalID
+		$external_id = $last_trading_account['externalId'] ?? null;
+		if ( ! $external_id ) {
+			return null;
+		}
+
+		$response_from_sso = Request_Api::send_api(
+			SSO_WEBTRADER_URL,
+			[
+				'login' => (int) $external_id,
+			],
+			'POST',
+			[
+				'Content-Type'  => 'application/json',
+				'Authorization' => SSO_WEBTRADER_TOKEN,
+			],
+			true
+		);
+		if ( ! $response_from_sso ) {
+			return null;
+		}
+
+		$sso_token = $response_from_sso['__token'] ?? null;
+		if ( ! $sso_token ) {
+			return null;
+		}
+
+		return esc_url_raw( SSO_WEBTRADER_REDIRECT_URL . $sso_token );
+	}
+
+	/**
+	 * We take all the records for whom brokerName === Live and select the most recent one by lastUpdateTime,
+	 * if there is no live, then simply by lastUpdateTime
+	 *
+	 * @param array $trading_accounts
+	 *
+	 * @return array|null
+	 */
+	private function get_last_trading_account( array $trading_accounts ): ?array {
+		$best_match = null;
+
+		// We are looking for an array with brokerName === 'Live' and the largest lastUpdateTime
+		foreach ( $trading_accounts as $item ) {
+			if ( ! isset( $item['brokerName'] ) || ! isset( $item['lastUpdateTime'] ) ) {
+				continue;
+			}
+
+			if ( $item['brokerName'] === 'Live' ) {
+				if ( $best_match === null || $item['lastUpdateTime'] > $best_match['lastUpdateTime'] ) {
+					$best_match = $item;
+				}
+			}
+		}
+
+		// If array with brokerName === 'Live' is not found, look for the largest lastUpdateTime among all
+		if ( $best_match === null ) {
+			foreach ( $trading_accounts as $item ) {
+				if ( ! isset( $item['lastUpdateTime'] ) ) {
+					continue;
+				}
+
+				if ( $best_match === null || $item['lastUpdateTime'] > $best_match['lastUpdateTime'] ) {
+					$best_match = $item;
+				}
+			}
+		}
+
+		return $best_match;
 	}
 }

@@ -24,17 +24,19 @@ abstract class Request_Api {
 		string $url,
 		$body = [],
 		string $method = 'GET',
-		array $headers = []
+		array $headers = [],
+		bool $body_json = false
 	) {
 		$request = wp_remote_request(
 			$url,
 			[
 				'headers' => $headers,
 				'method'  => $method,
-				'body'    => $body,
+				'body'    => $body_json ? wp_json_encode( $body ) : $body,
 				'timeout' => 90,
 			],
 		);
+
 		if ( is_wp_error( $request ) ) {
 			Error::instance()->log_error( 'request_api', $request->get_error_message() );
 			return false;
