@@ -67,16 +67,20 @@ class Autologin {
 			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
-		$provider          = new Antelope();
-		$link_for_redirect = $is_platform_link
-			? $this->get_sso_link( $provider, $asset, $account_id )
-			: $provider->get_autologin_link( $account_id );
+		$provider = new Antelope();
+		// Let's try to get SSO link first, if necessary
+		$link_for_redirect = $is_platform_link ? $this->get_sso_link( $provider, $asset, $account_id ) : null;
+		// If the SSO link was not found, we get an autologin link
+		if ( ! $link_for_redirect ) {
+			$link_for_redirect = $provider->get_autologin_link( $account_id );
+		}
 
+		// If neither SSO nor autologin link is available, show an error
 		if ( ! $link_for_redirect ) {
 			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
-		wp_redirect( $link_for_redirect );
+		wp_redirect( esc_url_raw( $link_for_redirect ) );
 		exit;
 	}
 
