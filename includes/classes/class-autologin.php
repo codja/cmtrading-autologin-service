@@ -75,11 +75,12 @@ class Autologin {
 			$link_for_redirect = $provider->get_autologin_link( $account_id );
 		}
 
+		// If neither SSO nor autologin link is available, show an error
 		if ( ! $link_for_redirect ) {
 			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
 		}
 
-		wp_redirect( $link_for_redirect );
+		wp_redirect( esc_url_raw( $link_for_redirect ) );
 		exit;
 	}
 
