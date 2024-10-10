@@ -78,7 +78,7 @@ class Autologin {
 			$link_for_redirect = $provider->get_autologin_link( $account_id );
 		}
 
-		// If neither SSO nor autologin link is available, show an error
+		// If neither SSO nor autologin link is available, redirect to the default link
 		if ( ! $link_for_redirect ) {
 			$link_for_redirect = self::DEFAULT_LINK;
 		}
