@@ -12,6 +12,8 @@ class Autologin {
 
 	const DEFAULT_DOMAIN = 'https://www.cmtrading.com';
 
+	const DEFAULT_LINK = 'https://myaccount.cmtrading.com/#/login';
+
 	const DEFAULT_LANGUAGE = 'en';
 
 	const ENDPOINTS = [
@@ -64,7 +66,8 @@ class Autologin {
 		$account_id     = $user_data['accountid'] ?? null;
 
 		if ( is_null( $db_customer_id ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_customer_id, $account_no ) ) {
-			wp_die( esc_html__( 'CRM DB error. Account not found.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
+			wp_redirect( esc_url_raw( self::DEFAULT_LINK ) );
+			exit;
 		}
 
 		$provider = new Antelope();
@@ -75,9 +78,9 @@ class Autologin {
 			$link_for_redirect = $provider->get_autologin_link( $account_id );
 		}
 
-		// If neither SSO nor autologin link is available, show an error
+		// If neither SSO nor autologin link is available, redirect to the default link
 		if ( ! $link_for_redirect ) {
-			wp_die( esc_html__( 'CRM API error. Contact the administrator.', 'cmtrading-autologin' ), '', [ 'response' => 403 ] );
+			$link_for_redirect = self::DEFAULT_LINK;
 		}
 
 		wp_redirect( esc_url_raw( $link_for_redirect ) );
