@@ -65,11 +65,16 @@ class Antelope implements Autologin {
 	/**
 	 * Error handler
 	 *
-	 * @param array $response
+	 * @param $response
 	 *
 	 * @return bool
 	 */
-	private function is_error_response( array $response ): bool {
+	private function is_error_response( $response ): bool {
+		if ( ! $response ) {
+			Error::instance()->log_error( 'Antelope_Api', __( 'Empty response', 'cmtrading-autologin' ) );
+			return true;
+		}
+
 		if ( isset( $response['error'] ) ) {
 			$description = $response['error']['errorDesc'] ?? '';
 			$error_log_msg = ' request_id[' . ( $response['requestId'] ?? '' ) . ']: '
