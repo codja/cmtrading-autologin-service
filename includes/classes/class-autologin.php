@@ -172,7 +172,7 @@ class Autologin {
 		) {
 			return null;
 		}
-		var_dump('here');
+
 		// get all of the client trading accounts
 		$trading_accounts = Helpers::get_array( $provider->get_trading_accounts( $account_id ) );
 		// we will use the last one that had update
