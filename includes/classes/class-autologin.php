@@ -17,26 +17,28 @@ class Autologin {
 	const DEFAULT_LANGUAGE = 'en';
 
 	const ENDPOINTS = [
-		'autologin'     => 'account_no',
-		'autologin_new' => 'customer_id',
+		'autologin'       => 'account_no',
+		'autologin_new'   => 'customer_id',
+		'simpleautologin' => '',
 	];
 
 	public function __construct() {
 		add_action( 'template_redirect', [ $this, 'autologin' ] );
 	}
 
+	/**
+	 * Handles the autologin functionality based on the requested URL and user status.
+	 *
+	 * @return void
+	 */
 	public function autologin(): void {
 		if ( ! Error::instance()->is_form_enabled() ) {
 			return;
 		}
 
-		$start = microtime( true );
-		$url   = trim(
-			wp_parse_url( $_SERVER['REQUEST_URI'] )['path'],
-			'/'
-		);
+		$url = trim( wp_parse_url( $_SERVER['REQUEST_URI'] )['path'] ?? '', '/' );
 
-		if ( ! array_key_exists( $url, self::ENDPOINTS ) ) {
+		if ( ! $url || ! array_key_exists( $url, self::ENDPOINTS ) ) {
 			return;
 		}
 
@@ -57,28 +59,32 @@ class Autologin {
 		$asset            = sanitize_text_field( $_GET['asset'] ?? '' );
 		$is_platform_link = $platform === 'Webtrader' && ! empty( $asset );
 
-		$action     = sanitize_text_field( $_GET['action'] ?? '' );
-		$lang       = sanitize_text_field( $_GET['lang'] ?? self::DEFAULT_LANGUAGE );
+		$user_data           = CRM_DB::instance()->get_user_register_data( 'email', $email, 'customer_id, accountid' );
+		$db_customer_id      = $user_data['customer_id'] ?? null;
+		$account_id          = $user_data['accountid'] ?? null;
+		$is_simple_autologin = $url === 'simpleautologin';
 
-		$fields         = 'customer_id, accountid';
-		$user_data      = CRM_DB::instance()->get_user_register_data( 'email', $email, $fields );
-		$db_customer_id = $user_data['customer_id'] ?? null;
-		$account_id     = $user_data['accountid'] ?? null;
-
-		if ( is_null( $db_customer_id ) || is_null( $account_id ) || ! $this->is_account_no_match( $db_customer_id, $account_no ) ) {
+		// Ensure the user data is valid
+		if ( is_null( $db_customer_id ) || is_null( $account_id ) || ( ! $is_simple_autologin && ! $this->is_account_no_match( $db_customer_id,
+					$account_no ) ) ) {
 			wp_redirect( esc_url_raw( self::DEFAULT_LINK ) );
 			exit;
 		}
 
-		$provider = new Antelope();
-		// Let's try to get SSO link first, if necessary
-		$link_for_redirect = $is_platform_link ? $this->get_sso_link( $provider, $asset, $account_id ) : null;
-		// If the SSO link was not found, we get an autologin link
+		$provider          = new Antelope();
+		$link_for_redirect = null;
+
+		// Attempt to get the SSO link if applicable
+		if ( $is_platform_link ) {
+			$link_for_redirect = $this->get_sso_link( $provider, $asset, $account_id );
+		}
+
+		// If no SSO link, fall back to autologin link
 		if ( ! $link_for_redirect ) {
 			$link_for_redirect = $provider->get_autologin_link( $account_id );
 		}
 
-		// If neither SSO nor autologin link is available, redirect to the default link
+		// If no valid link is found, redirect to the default link
 		if ( ! $link_for_redirect ) {
 			$link_for_redirect = self::DEFAULT_LINK;
 		}
@@ -93,6 +99,7 @@ class Autologin {
 		}
 
 		$date_without_time = explode( ' ', $user_registered, 2 );
+
 		return reset( $date_without_time ) === $registration_date;
 	}
 
